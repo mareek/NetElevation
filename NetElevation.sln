@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30413.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetElevation.Api", "NetElevation\NetElevation.Api.csproj", "{BA817CDB-0AEC-4BAC-A283-4590B5F73129}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetElevation.Core", "NetElevation.Core\NetElevation.Core.csproj", "{AA8C9FA4-03CE-4D65-A651-A1B8C3DD26A1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BA817CDB-0AEC-4BAC-A283-4590B5F73129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA817CDB-0AEC-4BAC-A283-4590B5F73129}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA817CDB-0AEC-4BAC-A283-4590B5F73129}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA817CDB-0AEC-4BAC-A283-4590B5F73129}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA8C9FA4-03CE-4D65-A651-A1B8C3DD26A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA8C9FA4-03CE-4D65-A651-A1B8C3DD26A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA8C9FA4-03CE-4D65-A651-A1B8C3DD26A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA8C9FA4-03CE-4D65-A651-A1B8C3DD26A1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7FADA65D-454E-406F-976D-91B122C8A936}
+	EndGlobalSection
+EndGlobal
