@@ -24,7 +24,6 @@ namespace NetElevation.Core
             };
 
             tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
-
         }
 
         public static Tiff TiffFromStream(MemoryStream memoryStream)
@@ -123,11 +122,11 @@ namespace NetElevation.Core
 
         private static void CopyTags(Tiff sourceTiff, Tiff targetTiff)
         {
-            TiffTag[] manualTags = { TiffTag.STRIPBYTECOUNTS, TiffTag.STRIPOFFSETS, TiffTag.TILEBYTECOUNTS, TiffTag.TILEOFFSETS, TiffTag.DOCUMENTNAME, TiffTag.IMAGEWIDTH, TiffTag.IMAGELENGTH, TiffTag.GEOTIFF_MODELTIEPOINTTAG, TiffTag.GEOTIFF_MODELPIXELSCALETAG };
+            TiffTag[] tagsToIgnore = { TiffTag.STRIPBYTECOUNTS, TiffTag.STRIPOFFSETS, TiffTag.TILEBYTECOUNTS, TiffTag.TILEOFFSETS, TiffTag.DOCUMENTNAME, TiffTag.IMAGEWIDTH, TiffTag.IMAGELENGTH, TiffTag.GEOTIFF_MODELTIEPOINTTAG, TiffTag.GEOTIFF_MODELPIXELSCALETAG };
             var tagsToCopy = Enum.GetValues(typeof(TiffTag))
                                  .OfType<TiffTag>()
                                  .Where(tag => sourceTiff.GetField(tag) != null)
-                                 .Except(manualTags)
+                                 .Except(tagsToIgnore)
                                  .ToArray();
             foreach (var tag in tagsToCopy)
             {

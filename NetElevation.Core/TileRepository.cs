@@ -20,12 +20,12 @@ namespace NetElevation.Core
 
         public TileInfo[] GetTiles()
         {
-            InitDirectory();
-            var fileContent = File.ReadAllText(ConfigFilePath);
+            InitRepository();
+            var fileContent = File.ReadAllBytes(ConfigFilePath);
             return JsonSerializer.Deserialize<TileInfo[]>(fileContent);
         }
 
-        private void InitDirectory()
+        private void InitRepository()
         {
             if (!File.Exists(ConfigFilePath))
             {
