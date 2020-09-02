@@ -1,13 +1,10 @@
-﻿using System;
-using System.IO;
-using System.IO.Compression;
+﻿using System.IO;
 using System.Linq;
 using System.Text.Json;
-using BitMiracle.LibTiff.Classic;
 
 namespace NetElevation.Core
 {
-    public class TileRepository
+    public class TileRepository : ITileRepository
     {
         private readonly DirectoryInfo _directory;
 
@@ -25,6 +22,8 @@ namespace NetElevation.Core
             return JsonSerializer.Deserialize<TileInfo[]>(fileContent);
         }
 
+        public FileInfo GetFile(TileInfo tileInfo) => new FileInfo(Path.Combine(_directory.FullName, tileInfo.FileName!));
+
         private void InitRepository()
         {
             if (!File.Exists(ConfigFilePath))
@@ -37,33 +36,17 @@ namespace NetElevation.Core
 
         public short[] GetElevationMap(TileInfo tileInfo)
         {
-            using var tiff = GetTiff(tileInfo.FileName!);
+            using var tiff = GeoTiffHelper.TiffFromZip(GetFile(tileInfo));
             return GeoTiffHelper.GetElevationMap(tiff);
-        }
-
-        public Tiff GetTiff(string fileName)
-        {
-            var memoryStream = GetZippedTiffStream(new FileInfo(Path.Combine(_directory.FullName, fileName)));
-            return GeoTiffHelper.TiffFromStream(memoryStream);
         }
 
         private TileInfo GetTileInfo(FileInfo zipFile)
         {
-            using var tiff = GetTiff(zipFile.Name);
+            using var tiff = GeoTiffHelper.TiffFromZip(zipFile);
 
             TileInfo tileInfo = GeoTiffHelper.GetTileInfo(tiff);
             tileInfo.FileName = zipFile.Name;
             return tileInfo;
-        }
-
-        private static MemoryStream GetZippedTiffStream(FileInfo zipFile)
-        {
-            using var zipArchive = ZipFile.OpenRead(zipFile.FullName);
-            var zippedTiff = zipArchive.Entries.Single(e => e.Name.EndsWith(".tif", StringComparison.OrdinalIgnoreCase));
-            using var zippedTiffStream = zippedTiff.Open();
-            var memoryStream = new MemoryStream();
-            zippedTiffStream.CopyTo(memoryStream);
-            return memoryStream;
         }
     }
 }

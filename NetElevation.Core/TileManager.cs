@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿#nullable enable
+using System;
 using System.Linq;
-using System.Text;
 
 namespace NetElevation.Core
 {
     public class TileManager
     {
-        private readonly TileRepository _repository;
+        private readonly ITileRepository _repository;
         private readonly Lazy<TileInfo[]> _tiles;
 
-        public TileManager(DirectoryInfo directory)
+        public TileManager(ITileRepository repository)
         {
-            _repository = new TileRepository(directory);
+            _repository = repository;
             _tiles = new Lazy<TileInfo[]>(_repository.GetTiles);
         }
 
@@ -21,14 +19,17 @@ namespace NetElevation.Core
 
         public short GetElevation(double latitude, double longitude)
         {
-            var tile = GetTiles().FirstOrDefault(t => t.Contains(latitude, longitude));
+            var tile = GetTile(latitude, longitude);
             if (tile == null)
             {
                 return 0;
             }
 
-            var elevationMap = _repository.GetElevationMap(tile);
-            return tile.GetElevation(latitude, longitude, elevationMap);
+            return tile.GetElevation(latitude, longitude, GetElevationMap(tile));
         }
+
+        private short[] GetElevationMap(TileInfo tile) => _repository.GetElevationMap(tile);
+
+        private TileInfo? GetTile(double latitude, double longitude) => GetTiles().FirstOrDefault(t => t.Contains(latitude, longitude));
     }
 }

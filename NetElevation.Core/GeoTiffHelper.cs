@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using BitMiracle.LibTiff.Classic;
 
@@ -25,6 +26,9 @@ namespace NetElevation.Core
 
             tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
         }
+
+        public static Tiff TiffFromZip(FileInfo zipFile) 
+            => TiffFromStream(GetZippedTiffStream(zipFile));
 
         public static Tiff TiffFromStream(MemoryStream memoryStream)
         {
@@ -147,6 +151,16 @@ namespace NetElevation.Core
             var modelPixelScaleSource = sourceTiff.GetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG);
             var modelPixelScaleTarget = modelPixelScaleSource.Select(v => v.Value).ToArray();
             geoTiff.SetField(TiffTag.GEOTIFF_MODELPIXELSCALETAG, modelPixelScaleTarget);
+        }
+
+        private static MemoryStream GetZippedTiffStream(FileInfo zipFile)
+        {
+            using var zipArchive = ZipFile.OpenRead(zipFile.FullName);
+            var zippedTiff = zipArchive.Entries.Single(e => e.Name.EndsWith(".tif", StringComparison.OrdinalIgnoreCase));
+            using var zippedTiffStream = zippedTiff.Open();
+            var memoryStream = new MemoryStream();
+            zippedTiffStream.CopyTo(memoryStream);
+            return memoryStream;
         }
 
         private class DisableErrorHandler : TiffErrorHandler

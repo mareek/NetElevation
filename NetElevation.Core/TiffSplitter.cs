@@ -58,7 +58,7 @@ namespace NetElevation.Core
 
         private void CreateSubtiles(TileInfo tileInfo, DirectoryInfo targetDirectory, int height, int width, List<(double north, double west, string subtileName)> subtilesInfo)
         {
-            using var tiff = _sourceRepository.GetTiff(tileInfo.FileName!);
+            using var tiff = GeoTiffHelper.TiffFromZip(_sourceRepository.GetFile(tileInfo));
 
             short[] elevationMap = GeoTiffHelper.GetElevationMap(tiff);
 
