@@ -12,7 +12,7 @@ namespace NetElevation.Core.Test
             public Func<TileInfo, short[]> GetElevationMapMock { get; set; } = _ => new short[0];
             public Func<TileInfo[]> GetTilesMock { get; set; } = () => new TileInfo[0];
 
-            public short[] GetElevationMap(TileInfo tileInfo) => GetElevationMapMock(tileInfo);
+            public short[] LoadElevationMap(TileInfo tileInfo) => GetElevationMapMock(tileInfo);
 
             public TileInfo[] GetTiles() => GetTilesMock();
         }

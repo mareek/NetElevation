@@ -34,7 +34,7 @@ namespace NetElevation.Core
             }
         }
 
-        public short[] GetElevationMap(TileInfo tileInfo)
+        public short[] LoadElevationMap(TileInfo tileInfo)
         {
             using var tiff = GeoTiffHelper.TiffFromZip(GetFile(tileInfo));
             return GeoTiffHelper.GetElevationMap(tiff);

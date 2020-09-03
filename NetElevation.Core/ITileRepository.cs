@@ -2,7 +2,7 @@
 {
     public interface ITileRepository
     {
-        short[] GetElevationMap(TileInfo tileInfo);
+        short[] LoadElevationMap(TileInfo tileInfo);
         TileInfo[] GetTiles();
     }
 }

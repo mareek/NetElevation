@@ -6,13 +6,15 @@ namespace NetElevation.Core
 {
     public class TileManager
     {
-        private readonly ITileRepository _repository;
+        private const int MaxCacheSize = 100_000_000;
+
+        private readonly ElevationMapCache _cache;
         private readonly Lazy<TileInfo[]> _tiles;
 
-        public TileManager(ITileRepository repository)
+        public TileManager(ITileRepository repository, int maxCacheSize = MaxCacheSize)
         {
-            _repository = repository;
-            _tiles = new Lazy<TileInfo[]>(_repository.GetTiles);
+            _cache = new ElevationMapCache(repository, maxCacheSize);
+            _tiles = new Lazy<TileInfo[]>(repository.GetTiles);
         }
 
         private TileInfo[] GetTiles() => _tiles.Value;
@@ -28,7 +30,7 @@ namespace NetElevation.Core
             return tile.GetElevation(latitude, longitude, GetElevationMap(tile));
         }
 
-        private short[] GetElevationMap(TileInfo tile) => _repository.GetElevationMap(tile);
+        private short[] GetElevationMap(TileInfo tile) => _cache.GetElevationMap(tile);
 
         private TileInfo? GetTile(double latitude, double longitude) => GetTiles().FirstOrDefault(t => t.Contains(latitude, longitude));
     }
