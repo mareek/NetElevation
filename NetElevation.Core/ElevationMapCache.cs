@@ -64,12 +64,20 @@ namespace NetElevation.Core
                 string[] tileNameByDate = _lastTouched.OrderBy(kvp => kvp.Value).Select(kvp => kvp.Key).ToArray();
 
                 int i = 0;
-                while (_currentCacheSize > targetCacheSize && i < tileNameByDate.Length)
+                while (i < tileNameByDate.Length)
                 {
-                    if (_cache.TryRemove(tileNameByDate[i], out var elevationMap))
+                    lock (_cache)
                     {
-                        _lastTouched.TryRemove(tileNameByDate[i], out var _);
-                        DecreaseCurrentCacheSize(elevationMap);
+                        if (_currentCacheSize <= targetCacheSize)
+                        {
+                            break;
+                        }
+
+                        if (_cache.TryRemove(tileNameByDate[i], out var elevationMap))
+                        {
+                            _lastTouched.TryRemove(tileNameByDate[i], out var _);
+                            DecreaseCurrentCacheSize(elevationMap);
+                        }
                     }
 
                     i += 1;
