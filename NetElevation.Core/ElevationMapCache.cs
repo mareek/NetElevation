@@ -45,9 +45,15 @@ namespace NetElevation.Core
         private short[] LoadElevationMap(TileInfo tileInfo)
         {
             var elevationMap = _repository.LoadElevationMap(tileInfo);
-            Interlocked.Add(ref _currentCacheSize, sizeof(short) * elevationMap.Length);
+            IncreaseCurrentCacheSize(elevationMap);
             return elevationMap;
         }
+
+        private int IncreaseCurrentCacheSize(short[] elevationMap) 
+            => Interlocked.Add(ref _currentCacheSize, sizeof(short) * elevationMap.Length);
+
+        private void DecreaseCurrentCacheSize(short[] elevationMap) 
+            => Interlocked.Add(ref _currentCacheSize, -sizeof(short) * elevationMap.Length);
 
         private void TrimCacheIfNeeded(int maxCacheSize)
         {
@@ -63,7 +69,7 @@ namespace NetElevation.Core
                     if (_cache.TryRemove(tileNameByDate[i], out var elevationMap))
                     {
                         _lastTouched.TryRemove(tileNameByDate[i], out var _);
-                        Interlocked.Add(ref _currentCacheSize, -elevationMap.Length);
+                        DecreaseCurrentCacheSize(elevationMap);
                     }
 
                     i += 1;
