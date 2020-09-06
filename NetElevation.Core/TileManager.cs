@@ -21,7 +21,7 @@
                 return 0;
             }
 
-            return tile.GetElevation(latitude, longitude, _cache.GetElevationMap(tile));
+            return tile.GetElevation(latitude, longitude, _cache.GetValue(tile));
         }
     }
 }

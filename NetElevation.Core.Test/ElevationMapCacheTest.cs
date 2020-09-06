@@ -12,31 +12,31 @@ namespace NetElevation.Core.Test
         [Fact]
         public void TestBasicScenario()
         {
-            var tile1 = new TileInfo { FileName = "tile1" };
-            var tile2 = new TileInfo { FileName = "tile2" };
-            var mapByTileName = new Dictionary<string, short[]>
+            var tile1 = new TileInfo { North = 1 };
+            var tile2 = new TileInfo { North = 2 };
+            var mapByTileName = new Dictionary<TileInfo, short[]>
             {
-                [tile1.FileName] = new short[5],
-                [tile2.FileName] = new short[10],
+                [tile1] = new short[5],
+                [tile2] = new short[10],
             };
 
-            var repo = new MockRepository { GetElevationMapMock = tile => mapByTileName[tile.FileName] };
+            var repo = new MockRepository { GetElevationMapMock = tile => mapByTileName[tile] };
             var cache = new ElevationMapCache(repo, 1000);
             //warm cache
-            Check.That(cache.GetElevationMap(tile1)).IsEqualTo(mapByTileName[tile1.FileName]);
-            Check.That(cache.GetElevationMap(tile2)).IsEqualTo(mapByTileName[tile2.FileName]);
+            Check.That(cache.GetValue(tile1)).IsEqualTo(mapByTileName[tile1]);
+            Check.That(cache.GetValue(tile2)).IsEqualTo(mapByTileName[tile2]);
 
             //set repo to fail on load
             repo.GetElevationMapMock = _ => throw new Exception("at this point, all tiles should be loaded from cache");
-            Check.That(cache.GetElevationMap(tile1)).IsEqualTo(mapByTileName[tile1.FileName]);
-            Check.That(cache.GetElevationMap(tile2)).IsEqualTo(mapByTileName[tile2.FileName]);
+            Check.That(cache.GetValue(tile1)).IsEqualTo(mapByTileName[tile1]);
+            Check.That(cache.GetValue(tile2)).IsEqualTo(mapByTileName[tile2]);
         }
 
         [Fact]
         public void TestCacheInvalidation()
         {
             var tiles = Enumerable.Range(0, 5)
-                                  .Select(i => new TileInfo { FileName = $"tile_{i}" })
+                                  .Select(i => new TileInfo { North = i })
                                   .ToArray();
             var mapByTile = tiles.ToDictionary(t => t, _ => new short[25]);
             var tileLoadCount = tiles.ToDictionary(t => t, _ => 0);
@@ -56,7 +56,7 @@ namespace NetElevation.Core.Test
                 for (int i = 0; i < 4; i++)
                 {
                     var tile = tiles[i];
-                    Check.That(cache.GetElevationMap(tile)).IsEqualTo(mapByTile[tile]);
+                    Check.That(cache.GetValue(tile)).IsEqualTo(mapByTile[tile]);
                     Thread.Sleep(1);
                 }
             }
@@ -67,18 +67,17 @@ namespace NetElevation.Core.Test
             Check.That(tileLoadCount[tiles[3]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[4]]).IsEqualTo(0);
 
-            Check.That(cache.GetElevationMap(tiles[4])).IsEqualTo(mapByTile[tiles[4]]);
-            Check.That(cache.GetElevationMap(tiles[3])).IsEqualTo(mapByTile[tiles[3]]);
-            Check.That(cache.GetElevationMap(tiles[2])).IsEqualTo(mapByTile[tiles[2]]);
-            Check.That(cache.GetElevationMap(tiles[1])).IsEqualTo(mapByTile[tiles[1]]);
-            Check.That(cache.GetElevationMap(tiles[0])).IsEqualTo(mapByTile[tiles[0]]);
+            Check.That(cache.GetValue(tiles[4])).IsEqualTo(mapByTile[tiles[4]]);
+            Check.That(cache.GetValue(tiles[3])).IsEqualTo(mapByTile[tiles[3]]);
+            Check.That(cache.GetValue(tiles[2])).IsEqualTo(mapByTile[tiles[2]]);
+            Check.That(cache.GetValue(tiles[1])).IsEqualTo(mapByTile[tiles[1]]);
+            Check.That(cache.GetValue(tiles[0])).IsEqualTo(mapByTile[tiles[0]]);
 
             Check.That(tileLoadCount[tiles[4]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[3]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[2]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[0]]).IsEqualTo(2);
             Check.That(tileLoadCount[tiles[1]]).IsEqualTo(2);
-
         }
     }
 }

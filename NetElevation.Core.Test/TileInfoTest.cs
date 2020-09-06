@@ -47,7 +47,21 @@ namespace NetElevation.Core.Test
             var tile2 = new TileInfo(north2, west2, span2, span2, 1, 1);
             Check.That(tile1.Intersect(tile2)).IsEqualTo(expectedResult);
             Check.That(tile2.Intersect(tile1)).IsEqualTo(expectedResult);
+        }
 
+        [Fact]
+        public void TestHashCode()
+        {
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(0, 0, 1, 1, 1, 1), true);
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(0, 0, 1, 1, 10, 10), true);
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(0, 0, 2, 2, 1, 1), false);
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(1, 1, 1, 1, 1, 1), false);
+
+            static void TestEqualAndHashCode(TileInfo referenceTile, TileInfo otherTile, bool isEqual)
+            {
+                Check.That(referenceTile.Equals(otherTile)).IsEqualTo(isEqual);
+                Check.That(referenceTile.GetHashCode() == otherTile.GetHashCode()).IsEqualTo(isEqual);
+            }
         }
     }
 }

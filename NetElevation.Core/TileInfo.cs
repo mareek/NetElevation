@@ -18,6 +18,15 @@ namespace NetElevation.Core
 
         public string? FileName { get; set; }
 
+        public override bool Equals(object? obj)
+        {
+            return obj is TileInfo info &&
+                   North == info.North &&
+                   West == info.West &&
+                   LatitudeSpan == info.LatitudeSpan &&
+                   LongitudeSpan == info.LongitudeSpan;
+        }
+
         public short GetElevation(double latitude, double longitude, short[] elevationMap)
         {
             var offsetLatitude = North - latitude;
@@ -26,6 +35,16 @@ namespace NetElevation.Core
             var y = (int)(Height * offsetLatitude / LatitudeSpan);
 
             return elevationMap[x + y * Width];
+        }
+
+        public override int GetHashCode()
+        {
+            int hashCode = 114314577;
+            hashCode = hashCode * -1521134295 + North.GetHashCode();
+            hashCode = hashCode * -1521134295 + West.GetHashCode();
+            hashCode = hashCode * -1521134295 + LatitudeSpan.GetHashCode();
+            hashCode = hashCode * -1521134295 + LongitudeSpan.GetHashCode();
+            return hashCode;
         }
     }
 }
