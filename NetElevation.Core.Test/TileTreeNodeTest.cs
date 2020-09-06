@@ -12,11 +12,12 @@ namespace NetElevation.Core.Test
             Check.That(emptyNode.GetTile(10, 10)).IsNull();
 
             var singleTileNode = new TileTreeNode(45, 45, 10, 10);
-            var lonelyTile = new TileInfo(45, 45, 10, 10, 1, 1);
+            var lonelyTile = new TileInfo(45, 45, 5, 5, 1, 1);
             singleTileNode.AddTiles(lonelyTile);
             Check.That(singleTileNode.GetTile(-15, -15)).IsNull();
             Check.That(singleTileNode.GetTile(45, 45)).IsEqualTo(lonelyTile);
-            Check.That(singleTileNode.GetTile(40, 50)).IsEqualTo(lonelyTile);
+            Check.That(singleTileNode.GetTile(44, 46)).IsEqualTo(lonelyTile);
+            Check.That(singleTileNode.GetTile(40, 50)).IsNull();
 
             var twinTileNode = new TileTreeNode(30, 30, 5, 10);
             var twinTile1 = new TileInfo(30, 30, 5, 5, 1, 1);
@@ -31,7 +32,8 @@ namespace NetElevation.Core.Test
             Check.That(root.GetTile(10, 10)).IsNull();
             Check.That(root.GetTile(-15, -15)).IsNull();
             Check.That(root.GetTile(45, 45)).IsEqualTo(lonelyTile);
-            Check.That(root.GetTile(40, 50)).IsEqualTo(lonelyTile);
+            Check.That(root.GetTile(44, 46)).IsEqualTo(lonelyTile);
+            Check.That(root.GetTile(40, 50)).IsNull();
             Check.That(root.GetTile(30, 30)).IsEqualTo(twinTile1);
             Check.That(root.GetTile(30, 35)).IsEqualTo(twinTile2);
         }

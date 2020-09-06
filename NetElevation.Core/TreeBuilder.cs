@@ -1,25 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace NetElevation.Core
 {
-    class TreeBuilder
+    public static class TreeBuilder
     {
-        private readonly TileInfo[] _tiles;
-
-        public TreeBuilder(TileInfo[] tiles)
-        {
-            _tiles = tiles;
-        }
-
-        public TileTreeNode BuildTree()
+        public static TileTreeNode BuildTree(TileInfo[] tiles)
         {
             var root = new TileTreeNode(90, -180, 180, 360);
 
             //first level: 90°*90°
-            var firstLevel =  CreateChildren(root, 2, 4).ToArray();
+            var firstLevel = CreateChildren(root, 2, 4).ToArray();
             //second level: 30°*30°
             var secondLevel = firstLevel.SelectMany(n => CreateChildren(n, 3, 3)).ToArray();
             //third level: 10°*10°
@@ -28,6 +19,11 @@ namespace NetElevation.Core
             var fourthLevel = thirdLevel.SelectMany(n => CreateChildren(n, 2, 5)).ToArray();
             //fourth level: 1°*1°
             var fifthLevel = fourthLevel.SelectMany(n => CreateChildren(n, 5, 2)).ToArray();
+
+            SetTilesToNodes(fifthLevel, tiles);
+
+            //Shake tree
+            root.RemoveEmptyChildren();
 
             return root;
         }
@@ -46,6 +42,14 @@ namespace NetElevation.Core
                     parentNode.AddChildren(child);
                     yield return child;
                 }
+            }
+        }
+
+        private static void SetTilesToNodes(IEnumerable<TileTreeNode> leafNodes, TileInfo[] tiles)
+        {
+            foreach (var node in leafNodes)
+            {
+                node.AddTiles(tiles.Where(t => t.Intersect(node)).ToArray());
             }
         }
     }

@@ -32,5 +32,22 @@ namespace NetElevation.Core.Test
                                      2, 3 };
             Check.That(tile.GetElevation(latitude, longitude, elevationMap)).IsEqualTo(expectedElevation);
         }
+
+        [Theory]
+        [InlineData(0, 0, 1, true, 0, 0, 1)]
+        [InlineData(0, 0, 1, true, 0.5, 0.5, 1)]
+        [InlineData(0, 0, 1, true, -0.5, 0.5, 1)]
+        [InlineData(0, 0, 1, true, -0.5, 0.5, 0.1)]
+        [InlineData(0, 0, 1, false, -1, 0, 1)]
+        [InlineData(0, 0, 1, false, 0, 1, 1)]
+        [InlineData(0, 0, 1, false, 5, 5, 1)]
+        public void TestIntersect(double north1, double west1, double span1, bool expectedResult, double north2, double west2, double span2)
+        {
+            var tile1 = new TileInfo(north1, west1, span1, span1, 1, 1);
+            var tile2 = new TileInfo(north2, west2, span2, span2, 1, 1);
+            Check.That(tile1.Intersect(tile2)).IsEqualTo(expectedResult);
+            Check.That(tile2.Intersect(tile1)).IsEqualTo(expectedResult);
+
+        }
     }
 }
