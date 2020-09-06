@@ -6,11 +6,12 @@ namespace NetElevation.Core
     {
         public TileInfo() { /*For serialization*/ }
 
-        public TileInfo(double north, double west, double latitudeSpan, double longitudeSpan, int width, int height)
+        public TileInfo(double north, double west, double latitudeSpan, double longitudeSpan, int width, int height, string? fileName = null)
             : base(north, west, latitudeSpan, longitudeSpan)
         {
             Width = width;
             Height = height;
+            FileName = fileName;
         }
 
         public int Width { get; set; }

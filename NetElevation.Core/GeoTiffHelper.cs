@@ -54,7 +54,7 @@ namespace NetElevation.Core
             return Tiff.ClientOpen("Tiff from zipstream", "r", memoryStream, new TiffStream());
         }
 
-        public static TileInfo GetTileInfo(Tiff tiff)
+        public static TileInfo GetTileInfo(Tiff tiff, string fileName)
         {
             int imageWidth = tiff.GetField(TiffTag.IMAGEWIDTH)[0].ToInt();
             int imageHeight = tiff.GetField(TiffTag.IMAGELENGTH)[0].ToInt();
@@ -68,7 +68,7 @@ namespace NetElevation.Core
             var DW = modelPixelScale[0];
             var DH = modelPixelScale[1];
 
-            return new TileInfo(north, west, DH * imageHeight, DW * imageWidth, imageWidth, imageHeight);
+            return new TileInfo(north, west, DH * imageHeight, DW * imageWidth, imageWidth, imageHeight, fileName);
         }
 
         public static short[] GetElevationMap(Tiff tiff)

@@ -49,10 +49,7 @@ namespace NetElevation.Core
         private TileInfo GetTileInfo(FileInfo zipFile)
         {
             using var tiff = GeoTiffHelper.TiffFromFile(zipFile);
-
-            TileInfo tileInfo = GeoTiffHelper.GetTileInfo(tiff);
-            tileInfo.FileName = zipFile.Name;
-            return tileInfo;
+            return GeoTiffHelper.GetTileInfo(tiff, zipFile.Name);
         }
     }
 }
