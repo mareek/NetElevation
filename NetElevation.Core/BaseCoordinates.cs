@@ -16,7 +16,7 @@ namespace NetElevation.Core
         }
 
         public double North { get; set; }
-        public double West { get; }
+        public double West { get; set; }
 
         public double LatitudeSpan { get; set; }
         public double LongitudeSpan { get; set; }

@@ -26,8 +26,7 @@ namespace NetElevation.Core
         public TValue GetValue(TKey TKey)
         {
             TouchEntry(TKey);
-            TValue entry;
-            if (!_cache.TryGetValue(TKey, out entry))
+            if (!_cache.TryGetValue(TKey, out TValue entry))
             {
                 //GetOrAdd is not atomic so we lock on TKey to prevent the entry to be loaded multiple times
                 lock (TKey)
@@ -60,6 +59,8 @@ namespace NetElevation.Core
         {
             if (_currentCacheSize > _maxCacheSize)
             {
+                /* We set a target size lower than the max size so that we don't run this 
+                   method for each allocation once the cache is full */
                 var targetCacheSize = 3 * _maxCacheSize / 4;
 
                 TKey[] entryKeysByDate = _lastTouched.OrderBy(kvp => kvp.Value)

@@ -1,4 +1,6 @@
-﻿namespace NetElevation.Core
+﻿using System.Linq;
+
+namespace NetElevation.Core
 {
     public class TileManager
     {
@@ -15,13 +17,34 @@
 
         public short GetElevation(double latitude, double longitude)
         {
-            var tile = _tileTreeRoot.GetTile(latitude, longitude);
-            if (tile == null)
-            {
-                return 0;
-            }
+            var location = new Location { Latitude = latitude, Longitude = longitude };
+            SetElevations(location);
+            return location.Elevation ?? 0;
+        }
 
-            return tile.GetElevation(latitude, longitude, _cache.GetValue(tile));
+        public void SetElevations(params Location[] locations)
+        {
+            var defaultTile = new TileInfo { North = 1000, West = -1000 };
+            var coordinatesByTile = locations.GroupBy(l => _tileTreeRoot.GetTile(l.Latitude, l.Longitude) ?? defaultTile);
+            foreach (var tileGroup in coordinatesByTile)
+            {
+                var tile = tileGroup.Key;
+                if (tile == defaultTile)
+                {
+                    foreach (var location in tileGroup)
+                    {
+                        location.Elevation = 0;
+                    }
+                }
+                else
+                {
+                    var elevationMap = _cache.GetValue(tile);
+                    foreach (var location in tileGroup)
+                    {
+                        location.Elevation = tile.GetElevation(location.Latitude, location.Longitude, elevationMap);
+                    }
+                }
+            }
         }
     }
 }
