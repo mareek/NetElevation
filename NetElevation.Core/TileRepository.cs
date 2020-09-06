@@ -28,7 +28,13 @@ namespace NetElevation.Core
         {
             if (!File.Exists(ConfigFilePath))
             {
-                var allTiles = _directory.GetFiles("*.zip").AsParallel().Select(GetTileInfo).ToArray();
+                var zipFiles = _directory.EnumerateFiles("*.zip");
+                var tiffFiles = _directory.EnumerateFiles("*.tiff");
+                var allTiles = zipFiles.Concat(tiffFiles)
+                                       .ToArray()
+                                       .AsParallel()
+                                       .Select(GetTileInfo)
+                                       .ToArray();
                 var serializedTiles = JsonSerializer.Serialize(allTiles, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(ConfigFilePath, serializedTiles);
             }
@@ -36,13 +42,13 @@ namespace NetElevation.Core
 
         public short[] LoadElevationMap(TileInfo tileInfo)
         {
-            using var tiff = GeoTiffHelper.TiffFromZip(GetFile(tileInfo));
+            using var tiff = GeoTiffHelper.TiffFromFile(GetFile(tileInfo));
             return GeoTiffHelper.GetElevationMap(tiff);
         }
 
         private TileInfo GetTileInfo(FileInfo zipFile)
         {
-            using var tiff = GeoTiffHelper.TiffFromZip(zipFile);
+            using var tiff = GeoTiffHelper.TiffFromFile(zipFile);
 
             TileInfo tileInfo = GeoTiffHelper.GetTileInfo(tiff);
             tileInfo.FileName = zipFile.Name;

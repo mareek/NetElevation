@@ -6,7 +6,7 @@ using BitMiracle.LibTiff.Classic;
 
 namespace NetElevation.Core
 {
-    static class GeoTiffHelper
+    internal static class GeoTiffHelper
     {
         static GeoTiffHelper()
         {
@@ -27,8 +27,26 @@ namespace NetElevation.Core
             tif.MergeFieldInfo(tiffFieldInfo, tiffFieldInfo.Length);
         }
 
-        public static Tiff TiffFromZip(FileInfo zipFile) 
-            => TiffFromStream(GetZippedTiffStream(zipFile));
+        public static Tiff TiffFromFile(FileInfo tiffFile)
+        {
+            MemoryStream memoryStream;
+            if (string.Equals(tiffFile.Extension, ".zip", StringComparison.OrdinalIgnoreCase))
+            {
+                memoryStream = GetZippedTiffStream(tiffFile);
+            }
+            else if (string.Equals(tiffFile.Extension, ".tif", StringComparison.OrdinalIgnoreCase))
+            {
+                memoryStream = new MemoryStream();
+                using var fileStream = tiffFile.OpenRead();
+                fileStream.CopyTo(memoryStream);
+            }
+            else
+            {
+                throw new ArgumentException($"unkown file format {tiffFile.Extension}", nameof(tiffFile));
+            }
+
+            return TiffFromStream(memoryStream);
+        }
 
         public static Tiff TiffFromStream(MemoryStream memoryStream)
         {

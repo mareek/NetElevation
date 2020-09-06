@@ -52,12 +52,12 @@ namespace NetElevation.Core.Test
         [Fact]
         public void TestHashCode()
         {
-            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(0, 0, 1, 1, 1, 1), true);
-            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(0, 0, 1, 1, 10, 10), true);
-            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(0, 0, 2, 2, 1, 1), false);
-            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), new TileInfo(1, 1, 1, 1, 1, 1), false);
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), true, new TileInfo(0, 0, 1, 1, 1, 1));
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), true, new TileInfo(0, 0, 1, 1, 10, 10));
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), false, new TileInfo(0, 0, 2, 2, 1, 1));
+            TestEqualAndHashCode(new TileInfo(0, 0, 1, 1, 1, 1), false, new TileInfo(1, 1, 1, 1, 1, 1));
 
-            static void TestEqualAndHashCode(TileInfo referenceTile, TileInfo otherTile, bool isEqual)
+            static void TestEqualAndHashCode(TileInfo referenceTile, bool isEqual, TileInfo otherTile)
             {
                 Check.That(referenceTile.Equals(otherTile)).IsEqualTo(isEqual);
                 Check.That(referenceTile.GetHashCode() == otherTile.GetHashCode()).IsEqualTo(isEqual);
