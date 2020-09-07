@@ -61,7 +61,7 @@ namespace NetElevation.Core.Test
             var trevouxLocation = new Location { Latitude = 45.94, Longitude = 4.77 };
             var machuPicchuLocation = new Location { Latitude = -13.163, Longitude = -72.545 };
             var newYorkLocation = new Location { Latitude = 40.8, Longitude = -73.97 };
-            Location[] locations = { lyonLocation, machuPicchuLocation, newYorkLocation, trevouxLocation};
+            Location[] locations = { lyonLocation, machuPicchuLocation, newYorkLocation, trevouxLocation };
 
             var selfDestructRepo = new MockRepository
             {

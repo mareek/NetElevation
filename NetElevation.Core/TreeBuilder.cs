@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
-using System.Transactions;
 
 namespace NetElevation.Core
 {
@@ -53,6 +50,8 @@ namespace NetElevation.Core
 
         private static void SetTilesToNodes(TileTreeNode[] leafNodes, TileInfo[] tiles)
         {
+            //This method is a bit slow (~5-7s on my laptop) but it is only called once at 
+            //startup and the code is simple enough to be (hopefully) bug free
             var northLimit = tiles.Max(tiles => tiles.North);
             var southLimit = tiles.Min(tiles => tiles.South);
 
@@ -66,67 +65,6 @@ namespace NetElevation.Core
             leafNodes.AsParallel()
                      .Where(n => northLimit > n.South && n.North > southLimit)
                      .ForAll(node => node.AddTiles(GetNodeTiles(node)));
-        }
-
-        private class Milestone
-        {
-            public Milestone(double latitude, int index)
-            {
-                Latitude = latitude;
-                Index = index;
-            }
-
-            public double Latitude { get; }
-            public int Index { get; }
-        }
-
-        private static void SetTilesToNodesOptimized(TileTreeNode[] leafNodes, TileInfo[] tiles)
-        {
-            var sortedTiles = tiles.OrderBy(t => t.West).ToArray();
-
-            IEnumerable<Milestone> GetMilestones(Func<TileInfo, double> getLatitude)
-            {
-                var firstTile = sortedTiles[0];
-                var lastMilestone = new Milestone(getLatitude(firstTile), 0);
-                yield return lastMilestone;
-                for (int i = 1; i < sortedTiles.Length; i++)
-                {
-                    var latitude = getLatitude(sortedTiles[i]);
-                    if (latitude > lastMilestone.Latitude)
-                    {
-                        lastMilestone = new Milestone(latitude, i);
-                        yield return lastMilestone;
-                    }
-                }
-            }
-
-            var westMilestones = GetMilestones(t => t.West).ToArray();
-            var eastMilestones = GetMilestones(t => t.East).ToArray();
-
-            Span<TileInfo> GetCandidateTiles(TileTreeNode node)
-            {
-                int start = eastMilestones.SkipWhile(m => m.Latitude < node.West).First().Index;
-                int finish = westMilestones.SkipWhile(m => node.East > m.Latitude).FirstOrDefault()?.Index ?? (sortedTiles.Length - 1);
-                return sortedTiles.AsSpan(start, finish - start + 1);
-            }
-
-            void AssignNodeTiles(TileTreeNode node)
-            {
-                foreach (var tile in GetCandidateTiles(node))
-                {
-                    if (tile.Intersect(node))
-                    {
-                        node.AddTile(tile);
-                    }
-                }
-            }
-
-            var northLimit = tiles.Max(tiles => tiles.North);
-            var southLimit = tiles.Min(tiles => tiles.South);
-
-            leafNodes.AsParallel()
-                     .Where(n => northLimit > n.South && n.North > southLimit)
-                     .ForAll(AssignNodeTiles);
         }
     }
 }
