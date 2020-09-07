@@ -20,6 +20,8 @@ namespace NetElevation.Core
 
         public void AddChildren(params TileTreeNode[] children) => _children.AddRange(children);
 
+        public void AddTile(TileInfo tile) => _tiles.Add(tile);
+
         public void AddTiles(params TileInfo[] tiles) => _tiles.AddRange(tiles);
 
         public void RemoveEmptyChildren()

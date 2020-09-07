@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Net.Sockets;
+using System.Transactions;
 
 namespace NetElevation.Core
 {
@@ -45,12 +48,51 @@ namespace NetElevation.Core
             }
         }
 
-        private static void SetTilesToNodes(IEnumerable<TileTreeNode> leafNodes, TileInfo[] tiles)
+        private static void SetTilesToNodes(TileTreeNode[] leafNodes, TileInfo[] tiles)
         {
-            foreach (var node in leafNodes)
+            var northLimit = tiles.Max(tiles => tiles.North);
+            var southLimit = tiles.Min(tiles => tiles.South);
+
+            var sortedTiles = tiles.OrderBy(t => t.West).ToArray();
+            TileInfo[] GetNodeTiles(TileTreeNode node)
+                => sortedTiles.SkipWhile(t => t.East < node.West)
+                              .TakeWhile(t => t.West < node.East)
+                              .Where(t => t.Intersect(node))
+                              .ToArray();
+
+            leafNodes.AsParallel()
+                     .Where(n => northLimit > n.South && n.North > southLimit)
+                     .ForAll(node => node.AddTiles(GetNodeTiles(node)));
+        }
+
+        private static void SetTilesToNodesAlt(TileTreeNode[] leafNodes, TileInfo[] tiles)
+        {
+            var sortedTiles = tiles.OrderBy(t => t.West).ToArray();
+
+            Span<TileInfo> GetCandidateTiles(TileTreeNode node)
             {
-                node.AddTiles(tiles.Where(t => t.Intersect(node)).ToArray());
+                int start = 0;
+                int finish = sortedTiles.Length-1;
+                return sortedTiles.AsSpan(start, finish - start + 1);
             }
+
+            void AssignNodeTiles(TileTreeNode node)
+            {
+                foreach (var tile in GetCandidateTiles(node))
+                {
+                    if (tile.Intersect(node))
+                    {
+                        node.AddTile(tile);
+                    }
+                }
+            }
+
+            var northLimit = tiles.Max(tiles => tiles.North);
+            var southLimit = tiles.Min(tiles => tiles.South);
+
+            leafNodes.AsParallel()
+                     .Where(n => northLimit > n.South && n.North > southLimit)
+                     .ForAll(AssignNodeTiles);
         }
     }
 }
