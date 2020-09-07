@@ -22,7 +22,7 @@ namespace NetElevation.Api.Controllers
         {
             if (!latitude.HasValue || !longitude.HasValue)
             {
-                return BadRequest("latitude and longitude parameters must be defined");
+                return BadRequest("latitude and longitude parameters must be set");
             }
 
             return Ok(tileManager.GetElevation(latitude.Value, longitude.Value));

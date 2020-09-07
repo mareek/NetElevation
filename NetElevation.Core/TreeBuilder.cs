@@ -23,7 +23,10 @@ namespace NetElevation.Core
             //fourth level: 1°*1°
             var fifthLevel = fourthLevel.SelectMany(n => CreateChildren(n, 5, 2)).ToArray();
 
-            SetTilesToNodes(fifthLevel, tiles);
+            if (tiles.Any())
+            {
+                SetTilesToNodes(fifthLevel, tiles);
+            }
 
             //Shake tree
             root.RemoveEmptyChildren();
@@ -65,14 +68,45 @@ namespace NetElevation.Core
                      .ForAll(node => node.AddTiles(GetNodeTiles(node)));
         }
 
-        private static void SetTilesToNodesAlt(TileTreeNode[] leafNodes, TileInfo[] tiles)
+        private class Milestone
+        {
+            public Milestone(double latitude, int index)
+            {
+                Latitude = latitude;
+                Index = index;
+            }
+
+            public double Latitude { get; }
+            public int Index { get; }
+        }
+
+        private static void SetTilesToNodesOptimized(TileTreeNode[] leafNodes, TileInfo[] tiles)
         {
             var sortedTiles = tiles.OrderBy(t => t.West).ToArray();
 
+            IEnumerable<Milestone> GetMilestones(Func<TileInfo, double> getLatitude)
+            {
+                var firstTile = sortedTiles[0];
+                var lastMilestone = new Milestone(getLatitude(firstTile), 0);
+                yield return lastMilestone;
+                for (int i = 1; i < sortedTiles.Length; i++)
+                {
+                    var latitude = getLatitude(sortedTiles[i]);
+                    if (latitude > lastMilestone.Latitude)
+                    {
+                        lastMilestone = new Milestone(latitude, i);
+                        yield return lastMilestone;
+                    }
+                }
+            }
+
+            var westMilestones = GetMilestones(t => t.West).ToArray();
+            var eastMilestones = GetMilestones(t => t.East).ToArray();
+
             Span<TileInfo> GetCandidateTiles(TileTreeNode node)
             {
-                int start = 0;
-                int finish = sortedTiles.Length-1;
+                int start = eastMilestones.SkipWhile(m => m.Latitude < node.West).First().Index;
+                int finish = westMilestones.SkipWhile(m => node.East > m.Latitude).FirstOrDefault()?.Index ?? (sortedTiles.Length - 1);
                 return sortedTiles.AsSpan(start, finish - start + 1);
             }
 
