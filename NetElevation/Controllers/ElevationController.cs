@@ -8,13 +8,13 @@ namespace NetElevation.Api.Controllers
     [ApiController]
     public class ElevationController : ControllerBase
     {
-        private static readonly TileManager tileManager = new TileManager(new TileRepository(new System.IO.DirectoryInfo(@"D:\SRTM\splitted")));
-
         private readonly ILogger<ElevationController> _logger;
+        private readonly TileManager _tileManager;
 
-        public ElevationController(ILogger<ElevationController> logger)
+        public ElevationController(ILogger<ElevationController> logger, TileManager tileManager)
         {
             _logger = logger;
+            _tileManager = tileManager;
         }
 
         [HttpGet]
@@ -25,7 +25,14 @@ namespace NetElevation.Api.Controllers
                 return BadRequest("latitude and longitude parameters must be set");
             }
 
-            return Ok(tileManager.GetElevation(latitude.Value, longitude.Value));
+            return Ok(_tileManager.GetElevation(latitude.Value, longitude.Value));
+        }
+
+        [HttpPost]
+        public IActionResult Post(Location[] locations)
+        {
+            _tileManager.SetElevations(locations);
+            return Ok(locations);
         }
     }
 }
