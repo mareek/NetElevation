@@ -12,7 +12,7 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "elevation?latitude=44.75&longitude=4.85",
+      "launchUrl": "elevation?latitude=0&longitude=0",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -20,7 +20,7 @@
     "NetElevation": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "elevation?latitude=44.75&longitude=4.85",
+      "launchUrl": "elevation?latitude=0&longitude=0",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

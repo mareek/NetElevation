@@ -27,8 +27,9 @@ namespace NetElevation
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var tileManager = new TileManager(new TileRepository(new DirectoryInfo(@"D:\SRTM\splitted")));
             services.AddControllers();
-            services.AddSingleton(_ => new TileManager(new TileRepository(new DirectoryInfo(@"D:\SRTM\splitted"))));
+            services.AddSingleton(_ => tileManager);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
