@@ -8,10 +8,9 @@ namespace NetElevation.Core
     {
         private readonly DirectoryInfo _directory;
 
-        public TileRepository(DirectoryInfo directory)
-        {
-            _directory = directory;
-        }
+        public TileRepository(string directoryPath) : this(new DirectoryInfo(directoryPath)) { }
+
+        public TileRepository(DirectoryInfo directory) => _directory = directory;
 
         private string ConfigFilePath => Path.Combine(_directory.FullName, "tiles.json");
 

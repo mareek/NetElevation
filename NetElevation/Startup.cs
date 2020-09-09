@@ -27,7 +27,9 @@ namespace NetElevation
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var tileManager = new TileManager(new TileRepository(new DirectoryInfo(@"D:\SRTM\splitted")));
+            string directoryPath = Configuration.GetValue<string>("ElevationTiles:DirectoryPath");
+            int cacheSize = 1_000_000 * Configuration.GetValue<int>("ElevationTiles:CacheSizeInMB");
+            var tileManager = new TileManager(new TileRepository(directoryPath), cacheSize);
             services.AddControllers();
             services.AddSingleton(_ => tileManager);
         }
