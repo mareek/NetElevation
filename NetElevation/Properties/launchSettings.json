@@ -29,7 +29,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/elevation",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/elevation?latitude=0&longitude=0",
       "publishAllPorts": true,
       "useSSL": true
     }
