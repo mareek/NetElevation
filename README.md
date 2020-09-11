@@ -1,2 +1,2 @@
 # NetElevation
- Get elevation anywhere in the world
+ Get altitude anywhere in the world
