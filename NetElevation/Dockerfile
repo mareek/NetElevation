@@ -7,16 +7,16 @@ EXPOSE 443
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
-COPY ["NetElevation/NetElevation.csproj", "NetElevation/"]
-RUN dotnet restore "NetElevation/NetElevation.csproj"
+COPY ["NetElevation/NetElevation.Api.csproj", "NetElevation/"]
+RUN dotnet restore "NetElevation/NetElevation.Api.csproj"
 COPY . .
 WORKDIR "/src/NetElevation"
-RUN dotnet build "NetElevation.csproj" -c Release -o /app/build
+RUN dotnet build "NetElevation.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "NetElevation.csproj" -c Release -o /app/publish
+RUN dotnet publish "NetElevation.Api.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "NetElevation.dll"]
+ENTRYPOINT ["dotnet", "NetElevation.Api.dll"]
