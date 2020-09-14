@@ -4,7 +4,12 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>54c8c72b-0228-42fc-99cf-0aa1045a3b1c</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileTag>mareek/netelevation</DockerfileTag>
+    <DockerfileFile>Dockerfile</DockerfileFile>
+    <DockerfileTag>mareek/netelevation:amd64</DockerfileTag>
+    <!--
+    <DockerfileFile>Dockerfile-arm32</DockerfileFile>
+    <DockerfileTag>mareek/netelevation:arm32</DockerfileTag>
+    -->
     <DockerfileRunArguments>-v "C:\SRTM":"/app/srtm"</DockerfileRunArguments>
   </PropertyGroup>
 
