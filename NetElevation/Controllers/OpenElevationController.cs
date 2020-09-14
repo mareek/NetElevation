@@ -63,7 +63,7 @@ namespace NetElevation.Api.Controllers
             var i = 0;
             while (nextPipeIndex >= 0)
             {
-                result[i] = ParseLocation(spanLocations.Slice(currentLocationIndex, nextPipeIndex - currentLocationIndex));
+                result[i] = ParseLocation(spanLocations[currentLocationIndex..nextPipeIndex]);
                 currentLocationIndex = nextPipeIndex + 1;
                 nextPipeIndex = locations.IndexOf('|', currentLocationIndex);
                 i++;
