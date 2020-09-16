@@ -173,9 +173,15 @@ namespace NetElevation.Core
 
         private static MemoryStream GetZippedTiffStream(FileInfo zipFile)
         {
-            using var zipArchive = ZipFile.OpenRead(zipFile.FullName);
-            var zippedTiff = zipArchive.Entries.Single(e => e.Name.EndsWith(".tif", StringComparison.OrdinalIgnoreCase));
-            using var zippedTiffStream = zippedTiff.Open();
+            using var fileStream = zipFile.OpenRead();
+            return GetZippedTiffStream(fileStream);
+        }
+
+        public static MemoryStream GetZippedTiffStream(Stream fileStream)
+        {
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+            var zippedTiffEntry = zipArchive.Entries.Single(e => e.Name.EndsWith(".tif", StringComparison.OrdinalIgnoreCase));
+            using var zippedTiffStream = zippedTiffEntry.Open();
             var memoryStream = new MemoryStream();
             zippedTiffStream.CopyTo(memoryStream);
             return memoryStream;
