@@ -10,3 +10,4 @@ Get altitude anywhere in the world
 - [x] Create a ZipRepository class  that implements ITileRepository and that load its data from a giant Zip file
 - [ ] Buy a domain and create a certificate on lets encrypt
 - [ ] Create a command line tool to split Geotiff into smaller files
+- [ ] Write some docs and a website
