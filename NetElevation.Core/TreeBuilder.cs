@@ -20,9 +20,9 @@ namespace NetElevation.Core
             //fourth level: 1°*1°
             var fifthLevel = fourthLevel.SelectMany(n => CreateChildren(n, 5, 2)).ToArray();
 
-            if (tiles.Any())
+            foreach (var tile in tiles)
             {
-                SetTilesToNodes(fifthLevel, tiles);
+                SetTileToNode(root, tile);
             }
 
             //Shake tree
@@ -48,23 +48,21 @@ namespace NetElevation.Core
             }
         }
 
-        private static void SetTilesToNodes(TileTreeNode[] leafNodes, TileInfo[] tiles)
+        private static void SetTileToNode(TileTreeNode node, TileInfo tile)
         {
-            //This method is a bit slow (~5-7s on my laptop) but it is only called once at 
-            //startup and the code is simple enough to be (hopefully) bug free
-            var northLimit = tiles.Max(tiles => tiles.North);
-            var southLimit = tiles.Min(tiles => tiles.South);
+            if (!node.Intersect(tile))
+                return;
 
-            var sortedTiles = tiles.OrderBy(t => t.West).ToArray();
-            TileInfo[] GetNodeTiles(TileTreeNode node)
-                => sortedTiles.SkipWhile(t => t.East < node.West)
-                              .TakeWhile(t => t.West < node.East)
-                              .Where(t => t.Intersect(node))
-                              .ToArray();
+            if (node.IsLeaf)
+            {
+                node.AddTile(tile);
+                return;
+            }
 
-            leafNodes.AsParallel()
-                     .Where(n => northLimit > n.South && n.North > southLimit)
-                     .ForAll(node => node.AddTiles(GetNodeTiles(node)));
+            foreach (var childNode in node.Children)
+            {
+                SetTileToNode(childNode, tile);
+            }
         }
     }
 }

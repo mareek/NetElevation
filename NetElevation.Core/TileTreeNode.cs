@@ -16,7 +16,11 @@ namespace NetElevation.Core
             _tiles = new List<TileInfo>();
         }
 
-        public bool IsEmpty => !_children.Any() && !_tiles.Any();
+        public bool IsEmpty => IsLeaf && !_tiles.Any();
+        
+        public bool IsLeaf => !_children.Any();
+
+        public IEnumerable<TileTreeNode> Children => _children.AsReadOnly();
 
         public void AddChildren(params TileTreeNode[] children) => _children.AddRange(children);
 
