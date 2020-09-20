@@ -32,14 +32,18 @@ namespace NetElevation.Core
             if (configFileExists && !force)
                 return;
 
-            var existingTiles = new HashSet<string>(configFileExists ? LoadConfigFile().Select(t => t.FileName) : Enumerable.Empty<string>());
+            var existingTiles = configFileExists ? LoadConfigFile() : new TileInfo[0];
+            var existingTileNames = new HashSet<string>(existingTiles.Select(t => t.FileName));
             var zipFiles = _directory.EnumerateFiles("*.zip");
             var tiffFiles = _directory.EnumerateFiles("*.tif");
             var allTiles = zipFiles.Concat(tiffFiles)
-                                   .Where(f => !existingTiles.Contains(f.Name))
+                                   .Where(f => !existingTileNames.Contains(f.Name))
                                    .ToArray()
                                    .AsParallel()
                                    .Select(GetTileInfo)
+                                   .Concat(existingTiles.AsParallel())
+                                   .OrderByDescending(t => t.North)
+                                   .ThenBy(t => t.West)
                                    .ToArray();
             var serializedTiles = JsonSerializer.Serialize(allTiles, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(ConfigFilePath, serializedTiles);
@@ -51,10 +55,10 @@ namespace NetElevation.Core
             return GeoTiffHelper.GetElevationMap(tiff);
         }
 
-        private TileInfo GetTileInfo(FileInfo zipFile)
+        private TileInfo GetTileInfo(FileInfo tileFile)
         {
-            using var tiff = GeoTiffHelper.TiffFromFile(zipFile);
-            return GeoTiffHelper.GetTileInfo(tiff, zipFile.Name);
+            using var tiff = GeoTiffHelper.TiffFromFile(tileFile);
+            return GeoTiffHelper.GetTileInfo(tiff, tileFile.Name);
         }
     }
 }
