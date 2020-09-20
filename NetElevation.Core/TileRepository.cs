@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 
@@ -16,27 +17,32 @@ namespace NetElevation.Core
 
         public TileInfo[] GetTiles()
         {
-            InitRepository();
-            var fileContent = File.ReadAllBytes(ConfigFilePath);
-            return JsonSerializer.Deserialize<TileInfo[]>(fileContent);
+            InitRepository(false);
+            return LoadConfigFile();
         }
+
+        private TileInfo[] LoadConfigFile()
+            => JsonSerializer.Deserialize<TileInfo[]>(File.ReadAllBytes(ConfigFilePath));
 
         public FileInfo GetFile(TileInfo tileInfo) => new FileInfo(Path.Combine(_directory.FullName, tileInfo.FileName!));
 
-        private void InitRepository()
+        public void InitRepository(bool force)
         {
-            if (!File.Exists(ConfigFilePath))
-            {
-                var zipFiles = _directory.EnumerateFiles("*.zip");
-                var tiffFiles = _directory.EnumerateFiles("*.tiff");
-                var allTiles = zipFiles.Concat(tiffFiles)
-                                       .ToArray()
-                                       .AsParallel()
-                                       .Select(GetTileInfo)
-                                       .ToArray();
-                var serializedTiles = JsonSerializer.Serialize(allTiles, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(ConfigFilePath, serializedTiles);
-            }
+            bool configFileExists = File.Exists(ConfigFilePath);
+            if (configFileExists && !force)
+                return;
+
+            var existingTiles = new HashSet<string>(configFileExists ? LoadConfigFile().Select(t => t.FileName) : Enumerable.Empty<string>());
+            var zipFiles = _directory.EnumerateFiles("*.zip");
+            var tiffFiles = _directory.EnumerateFiles("*.tif");
+            var allTiles = zipFiles.Concat(tiffFiles)
+                                   .Where(f => !existingTiles.Contains(f.Name))
+                                   .ToArray()
+                                   .AsParallel()
+                                   .Select(GetTileInfo)
+                                   .ToArray();
+            var serializedTiles = JsonSerializer.Serialize(allTiles, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(ConfigFilePath, serializedTiles);
         }
 
         public short[] LoadElevationMap(TileInfo tileInfo)
