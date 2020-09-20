@@ -7,8 +7,8 @@
     <DockerfileFile>Dockerfile</DockerfileFile>
     <DockerfileTag>mareek/netelevation:amd64</DockerfileTag>
     <!--
-    <DockerfileFile>Dockerfile-arm32</DockerfileFile>
-    <DockerfileTag>mareek/netelevation:arm32</DockerfileTag>
+    <DockerfileFile>Dockerfile-arm</DockerfileFile>
+    <DockerfileTag>mareek/netelevation:arm</DockerfileTag>
     -->
     <DockerfileRunArguments>-v "C:\SRTM":"/app/srtm"</DockerfileRunArguments>
   </PropertyGroup>
