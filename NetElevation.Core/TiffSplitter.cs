@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace NetElevation.Core
 {
-    class TiffSplitter
+    internal class TiffSplitter
     {
         private readonly TileRepository _sourceRepository;
 
@@ -33,20 +33,7 @@ namespace NetElevation.Core
             if (longitudeFactor <= 1.0 || latitudeFactor % 1.0 != 0)
                 throw new ArgumentException("longitudeFactor must be an integer", nameof(longitudeSpan));
 
-            var subtilesInfo = new List<(double north, double west, string subtileName)>();
-            for (double north = tileInfo.North; north > tileInfo.South; north -= latitudeSpan)
-            {
-                for (double west = tileInfo.West; west < tileInfo.East; west += longitudeSpan)
-                {
-                    var subTileName = GetTileName(north, west, latitudeSpan, longitudeSpan);
-                    var zipFilePath = Path.Combine(targetDirectory.FullName, subTileName + ".zip");
-                    if (!File.Exists(zipFilePath))
-                    {
-                        subtilesInfo.Add((north, west, subTileName));
-                    }
-                }
-            }
-
+            var subtilesInfo = GetSubTileInfo(tileInfo, latitudeSpan, longitudeSpan, targetDirectory).ToArray();
             if (subtilesInfo.Any())
             {
                 var height = (int)(tileInfo.Height / latitudeFactor);
@@ -56,7 +43,22 @@ namespace NetElevation.Core
             }
         }
 
-        private void CreateSubtiles(TileInfo tileInfo, DirectoryInfo targetDirectory, int height, int width, List<(double north, double west, string subtileName)> subtilesInfo)
+        private static IEnumerable<SubTileInfo> GetSubTileInfo(TileInfo tileInfo, double latitudeSpan, double longitudeSpan, DirectoryInfo targetDirectory)
+        {
+            for (double north = tileInfo.North; north > tileInfo.South; north -= latitudeSpan)
+            {
+                for (double west = tileInfo.West; west < tileInfo.East; west += longitudeSpan)
+                {
+                    var subTileName = GetTileName(north, west, latitudeSpan, longitudeSpan);
+                    if (!targetDirectory.EnumerateFiles(subTileName + ".zip").Any())
+                    {
+                        yield return new SubTileInfo(north, west, subTileName);
+                    }
+                }
+            }
+        }
+
+        private void CreateSubtiles(TileInfo tileInfo, DirectoryInfo targetDirectory, int height, int width, SubTileInfo[] subtilesInfo)
         {
             using var tiff = GeoTiffHelper.TiffFromFile(_sourceRepository.GetFile(tileInfo));
 
@@ -64,13 +66,14 @@ namespace NetElevation.Core
 
             subtilesInfo.AsParallel()
                         .WithDegreeOfParallelism(4)
-                        .ForAll(a => CreateSubtileZip(a.north, a.west, a.subtileName));
+                        .ForAll(CreateSubtileZip);
 
-            void CreateSubtileZip(double north, double west, string subTileName)
+            void CreateSubtileZip(SubTileInfo subTileInfo)
             {
-                var subTileData = GetSubTileData(tileInfo, north, west, width, height, elevationMap);
+                var subTileData = GetSubTileData(tileInfo, subTileInfo, width, height, elevationMap);
                 if (subTileData.Any(v => v != 0))
                 {
+                    var (north, west, subTileName) = (subTileInfo.North, subTileInfo.West, subTileInfo.SubtileName);
                     using var subTileTiffStream = GeoTiffHelper.CreateGeoTiff(tiff, subTileName, north, west, width, height, subTileData);
                     SaveTile(targetDirectory, subTileName, subTileTiffStream);
                 }
@@ -80,17 +83,17 @@ namespace NetElevation.Core
         private static string GetTileName(double north, double west, double latitudeSpan, double longitudeSpan)
         {
             static string formatLatitude(double latitude) => $"{(latitude >= 0 ? "N" : "S")}{Math.Abs(latitude):00}";
-            static string formatLongitude(double longitude) => $"{(longitude >= 0 ? "E" : "W")}{Math.Abs(longitude):00}";
+            static string formatLongitude(double longitude) => $"{(longitude >= 0 ? "E" : "W")}{Math.Abs(longitude):000}";
 
             var south = north - latitudeSpan;
             var east = west + longitudeSpan;
             return $"{formatLatitude(north)}{formatLongitude(west)}-{formatLatitude(south)}{formatLongitude(east)}";
         }
 
-        private static short[] GetSubTileData(TileInfo tileInfo, double north, double west, int width, int height, short[] elevationMap)
+        private static short[] GetSubTileData(TileInfo tileInfo, SubTileInfo subTileInfo, int width, int height, short[] elevationMap)
         {
-            int yOffset = (int)(tileInfo.Height * (tileInfo.North - north) / tileInfo.LatitudeSpan);
-            int xOffset = (int)(tileInfo.Width * (west - tileInfo.West) / tileInfo.LongitudeSpan);
+            int yOffset = (int)(tileInfo.Height * (tileInfo.North - subTileInfo.North) / tileInfo.LatitudeSpan);
+            int xOffset = (int)(tileInfo.Width * (subTileInfo.West - tileInfo.West) / tileInfo.LongitudeSpan);
             var result = new short[width * height];
             for (int row = 0; row < height; row++)
             {
@@ -110,6 +113,20 @@ namespace NetElevation.Core
             using var zipEntryStream = tiffZipEntry.Open();
             tiffStream.Position = 0;
             tiffStream.CopyTo(zipEntryStream);
+        }
+
+        private class SubTileInfo
+        {
+            public SubTileInfo(double north, double west, string subtileName)
+            {
+                North = north;
+                West = west;
+                SubtileName = subtileName;
+            }
+
+            public double North { get; }
+            public double West { get; }
+            public string SubtileName { get; }
         }
     }
 }

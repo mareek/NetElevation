@@ -47,14 +47,6 @@ namespace NetElevation.Api.Controllers
 
         private Location[] ParseLocations(string locations)
         {
-            static Location ParseLocation(ReadOnlySpan<char> text)
-            {
-                var commaIndex = text.IndexOf(',');
-                var latitude = double.Parse(text.Slice(0, commaIndex), provider: CultureInfo.InvariantCulture);
-                var longitude = double.Parse(text.Slice(commaIndex + 1), provider: CultureInfo.InvariantCulture);
-                return new Location { Latitude = latitude, Longitude = longitude };
-            }
-
             var result = new Location[locations.Count(c => c == '|') + 1];
 
             var spanLocations = locations.AsSpan();
@@ -72,6 +64,14 @@ namespace NetElevation.Api.Controllers
             result[i] = ParseLocation(spanLocations.Slice(currentLocationIndex));
 
             return result;
+        }
+
+        private static Location ParseLocation(ReadOnlySpan<char> text)
+        {
+            var commaIndex = text.IndexOf(',');
+            var latitude = double.Parse(text.Slice(0, commaIndex), provider: CultureInfo.InvariantCulture);
+            var longitude = double.Parse(text.Slice(commaIndex + 1), provider: CultureInfo.InvariantCulture);
+            return new Location { Latitude = latitude, Longitude = longitude };
         }
     }
 }
