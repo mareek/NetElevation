@@ -23,7 +23,6 @@ returns: an array of coordinates with altitude [ { latitude: 45.76, longitude: 4
 - [x] Create a ZipRepository that load its data from a giant Zip file
 - [x] Write some docs
 - [ ] Write better docs
-- [ ] replace doubles with floats
 - [ ] Buy a domain and create a certificate on lets encrypt
 - [ ] Create a website
 - [ ] Create a command line tool to split Geotiff into smaller files
