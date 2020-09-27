@@ -22,7 +22,10 @@ returns: an array of coordinates with altitude [ { latitude: 45.76, longitude: 4
 - [x] Create a controller compatible Open Elevation API
 - [x] Create a ZipRepository that load its data from a giant Zip file
 - [x] Write some docs
+- [ ] Create a nuget package for NetElevation.Core
 - [ ] Write better docs
-- [ ] Buy a domain and create a certificate on lets encrypt
-- [ ] Create a website
 - [ ] Create a command line tool to split Geotiff into smaller files
+- [ ] Add support for tar files
+- [ ] Create a website
+- [ ] Buy a domain and create a certificate on lets encrypt
+- [ ] Create a proxy to handle multiple servers
