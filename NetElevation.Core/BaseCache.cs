@@ -7,7 +7,7 @@ namespace NetElevation.Core
 {
     public abstract class BaseCache<TKey, TValue>
     {
-        private readonly ConcurrentDictionary<TKey, TValue> _cache;
+        private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _cache;
         private readonly ConcurrentDictionary<TKey, DateTime> _lastTouched;
         private readonly int _maxCacheSize;
         private int _currentCacheSize;
@@ -15,7 +15,7 @@ namespace NetElevation.Core
         protected BaseCache(int maxCacheSize)
         {
             _maxCacheSize = maxCacheSize;
-            _cache = new ConcurrentDictionary<TKey, TValue>();
+            _cache = new ConcurrentDictionary<TKey, Lazy<TValue>>();
             _lastTouched = new ConcurrentDictionary<TKey, DateTime>();
             _currentCacheSize = 0;
         }
@@ -26,18 +26,16 @@ namespace NetElevation.Core
         public TValue GetValue(TKey TKey)
         {
             TouchEntry(TKey);
-            if (!_cache.TryGetValue(TKey, out TValue entry))
-            {
-                //GetOrAdd is not atomic so we lock on TKey to prevent the entry to be loaded multiple times
-                lock (TKey)
-                {
-                    entry = _cache.GetOrAdd(TKey, _ => LoadEntry(TKey));
-                }
 
-                TrimCacheIfNeeded();
-            }
+            //GetOrAdd is not atomic in the sense that valueFactory can be call multiple
+            //time if GetOrAdd is called concurently with the same key.
+            //We circonvert this problem by using a Lazy<TValue> type instead of a TValue
+            var entry = _cache.GetOrAdd(TKey, key => new Lazy<TValue>(() => LoadEntry(key)));
+            var value = entry.Value;
+            
+            TrimCacheIfNeeded();
 
-            return entry;
+            return value;
         }
 
         private void TouchEntry(TKey TKey) => _lastTouched[TKey] = DateTime.UtcNow;
@@ -80,7 +78,7 @@ namespace NetElevation.Core
                         if (_cache.TryRemove(entryKeysByDate[i], out var entry))
                         {
                             _lastTouched.TryRemove(entryKeysByDate[i], out var _);
-                            DecreaseCurrentCacheSize(entry);
+                            DecreaseCurrentCacheSize(entry.Value);
                         }
                     }
 
