@@ -1,25 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>54c8c72b-0228-42fc-99cf-0aa1045a3b1c</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileFile>Dockerfile</DockerfileFile>
-    <DockerfileTag>mareek/netelevation:amd64</DockerfileTag>
-    <!--
-    <DockerfileFile>Dockerfile-arm</DockerfileFile>
-    <DockerfileTag>mareek/netelevation:arm</DockerfileTag>
-    -->
-    <DockerfileRunArguments>-v "C:\SRTM":"/app/srtm"</DockerfileRunArguments>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<UserSecretsId>54c8c72b-0228-42fc-99cf-0aa1045a3b1c</UserSecretsId>
+		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+		<DockerfileFile>Dockerfile</DockerfileFile>
+		<DockerfileTag>mareek/netelevation:amd64</DockerfileTag>
+		<!--
+        <DockerfileFile>Dockerfile-arm</DockerfileFile>
+        <DockerfileTag>mareek/netelevation:arm</DockerfileTag>
+        -->
+		<DockerfileRunArguments>-v "C:\SRTM":"/app/srtm"</DockerfileRunArguments>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.9" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\NetElevation.Core\NetElevation.Core.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\NetElevation.Core\NetElevation.Core.csproj" />
+	</ItemGroup>
 
 
 </Project>
