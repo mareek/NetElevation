@@ -50,34 +50,47 @@ namespace NetElevation.Core.Test
                 }
             };
 
+            // create a cahce taht can hold 4 tiles
             var cache = new ElevationMapCache(repo, 200);
-            for (int j = 0; j < 3; j++)
+
+            // get the 4 first tiles repeatedly from the cache
+            for (int j = 0; j < 10; j++)
             {
                 for (int i = 0; i < 4; i++)
                 {
                     var tile = tiles[i];
                     Check.That(cache.GetValue(tile)).IsEqualTo(mapByTile[tile]);
-                    Thread.Sleep(1);
                 }
             }
+            // cache should contains tiles 0, 1, 2, 3
 
+            // check that the tiles has only been loaded once
             Check.That(tileLoadCount[tiles[0]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[1]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[2]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[3]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[4]]).IsEqualTo(0);
 
+            // get the 5th tile ; triggering a cache cleanup that'll set the cahce to 3/4 o the max size => 3 tiles
             Check.That(cache.GetValue(tiles[4])).IsEqualTo(mapByTile[tiles[4]]);
-            Check.That(cache.GetValue(tiles[3])).IsEqualTo(mapByTile[tiles[3]]);
-            Check.That(cache.GetValue(tiles[2])).IsEqualTo(mapByTile[tiles[2]]);
-            Check.That(cache.GetValue(tiles[1])).IsEqualTo(mapByTile[tiles[1]]);
-            Check.That(cache.GetValue(tiles[0])).IsEqualTo(mapByTile[tiles[0]]);
+            // cache should contains tiles 2, 3, 4
 
+            // get the 4 firt tiles again
+            Check.That(cache.GetValue(tiles[3])).IsEqualTo(mapByTile[tiles[3]]);
+            // cache should contains tiles 2, 3, 4
+            Check.That(cache.GetValue(tiles[2])).IsEqualTo(mapByTile[tiles[2]]);
+            // cache should contains tiles 2, 3, 4
+            Check.That(cache.GetValue(tiles[1])).IsEqualTo(mapByTile[tiles[1]]);
+            // cache should contains tiles 1, 2, 3, 4
+            Check.That(cache.GetValue(tiles[0])).IsEqualTo(mapByTile[tiles[0]]);
+            // cache should contains tiles 0, 1, 2
+
+            // check the load count of each tile
             Check.That(tileLoadCount[tiles[4]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[3]]).IsEqualTo(1);
             Check.That(tileLoadCount[tiles[2]]).IsEqualTo(1);
-            Check.That(tileLoadCount[tiles[0]]).IsEqualTo(2);
             Check.That(tileLoadCount[tiles[1]]).IsEqualTo(2);
+            Check.That(tileLoadCount[tiles[0]]).IsEqualTo(2);
         }
     }
 }
